@@ -9,14 +9,13 @@ CLI tool for fetching JIRA worklogs.
 ## Usage
 
 ```
-Usage: jira-worklog [options]
+Usage: index [options] <file>
 
-  Options:
+Options:
 
-    -h, --help          output usage information
-    -V, --version       output the version number
-    -h, --host <s>      Root URL for Jira client
-    -u, --username <s>  Username
-    -p, --password <s>  Password
-    -o, --output <s>    Path for JSON file output
+  -h, --help          output usage information
+  -V, --version       output the version number
+  -h, --host <s>      Root URL for Jira client
+  -u, --username <s>  Username
+  -p, --password <s>  Password
 ```

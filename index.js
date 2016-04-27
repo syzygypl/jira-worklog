@@ -6,23 +6,28 @@ var fs = require('fs');
 
 var Spinner = require('cli-spinner').Spinner;
 var spinner = new Spinner();
-spinner.setSpinnerString('|/-\\');
+
+var isPiped = !process.stdout.isTTY;
+
+// CLI configuration
 
 program
   .version(version)
+  .usage('[options] <file>')
   .option('-h, --host <s>', 'Root URL for Jira client')
   .option('-u, --username <s>', 'Username')
   .option('-p, --password <s>', 'Password')
-  .option('-o, --output <s>', 'Path for JSON file output')
   .parse(process.argv);
 
-['host', 'username', 'password', 'output'].forEach(option => {
+['host', 'username', 'password'].forEach(option => {
   if (!program[option]) {
     console.error('Error: Missing option --' + option);
     program.outputHelp();
     process.exit(1);
   }
 });
+
+// Processing starts here
 
 var client = require('./src/client')({
   host: program.host,
@@ -33,14 +38,24 @@ var client = require('./src/client')({
 }, spinner);
 var api = require('./src/api')(client);
 
-spinner.start();
+if (!isPiped) {
+  spinner.start();
+}
 
-api.worklog()
+api.getProjectWorklog('SYZ')
   .then(projects => {
-    spinner.setSpinnerTitle('');
-    spinner.stop();
-    fs.writeFile(program.output, JSON.stringify(projects, null, 4));
-    console.log('\nOutput written to:', program.output);
+    var stringify = JSON.stringify(projects, null, 4);
+
+    if (!isPiped) {
+      spinner.stop(true);
+    }
+
+    if (program.args[0]) {
+      fs.writeFile(program.args[0], stringify);
+      console.error('Output written to:', program.args[0]);
+    } else {
+      console.log(stringify);
+    }
   })
   .catch(error => {
     console.error(error);

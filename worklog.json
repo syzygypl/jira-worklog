@@ -1,0 +1,68 @@
+{
+    "project": "SYZ",
+    "versions": [
+        {
+            "self": "https://jira.arsthanea.com/rest/api/2/version/11904",
+            "id": "11904",
+            "name": "Global website",
+            "archived": false,
+            "released": false,
+            "releaseDate": "2016-05-31",
+            "overdue": false,
+            "userReleaseDate": "31/May/16",
+            "projectId": 11401,
+            "timespent": {
+                "confluence-users": 611,
+                "IT Members": 484,
+                "jira-administrators": 293,
+                "IT Leaders": 106,
+                "jira-developers": 384,
+                "jira-users": 384,
+                "confluence-administrators": 19,
+                "gooapps": 10,
+                "PM Members": 89
+            }
+        },
+        {
+            "self": "https://jira.arsthanea.com/rest/api/2/version/11907",
+            "id": "11907",
+            "name": "Launch",
+            "archived": false,
+            "released": true,
+            "releaseDate": "2016-04-08",
+            "userReleaseDate": "08/Apr/16",
+            "projectId": 11401,
+            "timespent": {
+                "confluence-administrators": 4,
+                "confluence-users": 137,
+                "gooapps": 4,
+                "IT Leaders": 4,
+                "IT Members": 71,
+                "jira-administrators": 4,
+                "jira-developers": 125,
+                "jira-users": 125,
+                "Strategy & Creative Members": 0,
+                "PM Members": 17
+            }
+        },
+        {
+            "self": "https://jira.arsthanea.com/rest/api/2/version/12006",
+            "id": "12006",
+            "name": "Tymczasowa strona",
+            "archived": false,
+            "released": true,
+            "releaseDate": "2016-03-21",
+            "userReleaseDate": "21/Mar/16",
+            "projectId": 11401,
+            "timespent": {
+                "confluence-administrators": 9,
+                "confluence-users": 12,
+                "IT Leaders": 9,
+                "IT Members": 9,
+                "jira-administrators": 9,
+                "jira-developers": 12,
+                "jira-users": 12
+            }
+        }
+    ]
+}
