@@ -14,7 +14,7 @@ var isPiped = !process.stdout.isTTY;
 program
   .version(version)
   .usage('[options] <file>')
-  .option('-h, --host <s>', 'Root URL for Jira client')
+  .option('-H, --host <s>', 'Root URL for Jira client')
   .option('-u, --username <s>', 'Username')
   .option('-p, --password <s>', 'Password')
   .parse(process.argv);

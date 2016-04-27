@@ -15,7 +15,7 @@ Options:
 
   -h, --help          output usage information
   -V, --version       output the version number
-  -h, --host <s>      Root URL for Jira client
+  -H, --host <s>      Root URL for Jira client
   -u, --username <s>  Username
   -p, --password <s>  Password
 ```
