@@ -42,7 +42,7 @@ if (!isPiped) {
   spinner.start();
 }
 
-api.getProjectWorklog('SYZ')
+api.worklog()
   .then(projects => {
     var stringify = JSON.stringify(projects, null, 4);
 

@@ -1,6 +1,6 @@
 {
   "name": "jira-worklog",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CLI tool for fetching JIRA worklogs",
   "main": "index.js",
   "bin": "./index.js",
