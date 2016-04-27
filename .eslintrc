@@ -1,0 +1,4 @@
+extends: google
+rules:
+  handle-callback-err: 0
+  require-jsdoc: 0
