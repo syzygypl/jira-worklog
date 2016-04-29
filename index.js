@@ -3,6 +3,7 @@
 var version = require('./package').version;
 var program = require('commander');
 var fs = require('fs');
+var prompt = require('prompt');
 
 var Spinner = require('cli-spinner').Spinner;
 var spinner = new Spinner();
@@ -10,40 +11,56 @@ var spinner = new Spinner();
 var isPiped = !process.stdout.isTTY;
 
 // CLI configuration
+new Promise(function(resolve, reject) {
+  program
+    .version(version)
+    .usage('[options] <file>')
+    .option('-H, --host <s>', 'Root URL for Jira client')
+    .option('-u, --username <s>', 'Username')
+    .option('-p, --password <s>', 'Password')
+    .parse(process.argv);
 
-program
-  .version(version)
-  .usage('[options] <file>')
-  .option('-H, --host <s>', 'Root URL for Jira client')
-  .option('-u, --username <s>', 'Username')
-  .option('-p, --password <s>', 'Password')
-  .parse(process.argv);
+  var missingOptions = ['host', 'username', 'password']
+    .filter(option => !program[option]);
 
-['host', 'username', 'password'].forEach(option => {
-  if (!program[option]) {
-    console.error('Error: Missing option --' + option);
-    program.outputHelp();
-    process.exit(1);
+  if (missingOptions.length) {
+    prompt.message = '';
+    prompt.start();
+    prompt.get(missingOptions.map(option => {
+      const define = {name: option};
+      if (option === 'password') {
+        define.hidden = true;
+      }
+      return define;
+    }, {}), (err, result) => {
+      prompt.stop();
+
+      if (err) {
+        return reject(err);
+      }
+
+      Object.keys(result).forEach(key => {
+        program[key] = result[key];
+      });
+
+      resolve();
+    });
   }
-});
+}).then(() => {
+  var client = require('./src/client')({
+    host: program.host,
+    basic_auth: { // eslint-disable-line
+      username: program.username,
+      password: program.password
+    }
+  }, spinner);
+  var api = require('./src/api')(client);
 
-// Processing starts here
-
-var client = require('./src/client')({
-  host: program.host,
-  basic_auth: { // eslint-disable-line
-    username: program.username,
-    password: program.password
+  if (!isPiped) {
+    spinner.start();
   }
-}, spinner);
-var api = require('./src/api')(client);
 
-if (!isPiped) {
-  spinner.start();
-}
-
-api.worklog()
-  .then(projects => {
+  return api.worklog().then(projects => {
     var stringify = JSON.stringify(projects, null, 4);
 
     if (!isPiped) {
@@ -56,7 +73,7 @@ api.worklog()
     } else {
       console.log(stringify);
     }
-  })
-  .catch(error => {
-    console.error(error);
   });
+}).catch(error => {
+  console.error(error);
+});
