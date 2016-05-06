@@ -105,8 +105,6 @@ module.exports = function(client) {
         return Promise.all(items.map(item => {
           return getTimespent(item.issues).then(timespent => {
             item.version.timespent = timespent;
-            item.version.totalTimespent = Object.keys(timespent)
-              .reduce((acc, key) => acc + timespent[key], 0);
             item.version.projectKey = projectKey;
 
             return item.version;
