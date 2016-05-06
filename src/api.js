@@ -1,29 +1,29 @@
 module.exports = function(client) {
-  var users = client('groups.findGroups')
-    .then(groups => {
-      return Promise.all(groups.groups.map(group => {
-        return client('group.getGroup', {
-          groupName: group.name,
-          expand: ['users']
-        });
-      }));
-    })
-    .then(groups => {
-      var map = new Map();
-
-      groups.forEach(group => {
-        group.users.items.forEach(user => {
-          var set = map.get(user.key);
-          if (!set) {
-            set = new Set();
-            map.set(user.key, set);
-          }
-          set.add(group.name);
-        });
+  var groups = client('groups.findGroups').then(groups => {
+    return Promise.all(groups.groups.map(group => {
+      return client('group.getGroup', {
+        groupName: group.name,
+        expand: ['users']
       });
+    }));
+  });
 
-      return map;
+  var users = groups.then(groups => {
+    var map = new Map();
+
+    groups.forEach(group => {
+      group.users.items.forEach(user => {
+        var set = map.get(user.key);
+        if (!set) {
+          set = new Set();
+          map.set(user.key, set);
+        }
+        set.add(group.name);
+      });
     });
+
+    return map;
+  });
 
   function getIssues(versionId, temp, startAt) {
     var maxResults = 1000;
@@ -61,32 +61,35 @@ module.exports = function(client) {
   }
 
   function getTimespent(issues) {
-    var timespent = {};
+    return groups.then(groups => {
+      return groups.reduce((acc, group) => {
+        acc[group.name] = 0;
+        return acc;
+      }, {});
+    }).then(timespent => {
+      return Promise.all(issues.map(issue => {
+        return Promise.all([
+          users, client('issue.getWorkLogs', {issueId: issue.id})
+        ])
+          .then(results => {
+            var users = results[0];
+            var worklogs = results[1];
 
-    return Promise.all(issues.map(issue => {
-      return Promise.all([
-        users, client('issue.getWorkLogs', {issueId: issue.id})
-      ])
-        .then(results => {
-          var users = results[0];
-          var worklogs = results[1];
-
-          worklogs.worklogs
-            .filter(worklog => worklog.author.key)
-            .forEach(worklog => {
-              const key = worklog.author.key;
-              const set = users.get(key);
-              if (set) {
-                set.forEach(group => {
-                  timespent[group] =
-                    (timespent[group] || 0) +
-                    Math.round(worklog.timeSpentSeconds / 3600);
-                });
-              }
-            });
-        });
-    })).then(() => {
-      return timespent;
+            worklogs.worklogs
+              .filter(worklog => worklog.author.key)
+              .forEach(worklog => {
+                const key = worklog.author.key;
+                const set = users.get(key);
+                if (set) {
+                  for (var group of set) {
+                    timespent[group] =
+                      (timespent[group] || 0) +
+                      Math.round(worklog.timeSpentSeconds / 3600);
+                  }
+                }
+              });
+          });
+      })).then(() => timespent);
     });
   }
 
@@ -97,24 +100,26 @@ module.exports = function(client) {
       });
     },
 
-    getProjectWorklog(projectKey) {
+    getProjectVersions(projectKey) {
       return getVersions(projectKey).then(items => {
         return Promise.all(items.map(item => {
           return getTimespent(item.issues).then(timespent => {
             item.version.timespent = timespent;
+            item.version.projectKey = projectKey;
+
             return item.version;
           });
         }));
-      }).then(versions => {
-        return {project: projectKey, versions: versions};
       });
     },
 
     worklog() {
       return this.getAllProjects().then(projects => {
         return Promise.all(projects.map(project => {
-          return this.getProjectWorklog(project);
+          return this.getProjectVersions(project);
         }));
+      }).then(projects => {
+        return projects.reduce((acc, versions) => acc.concat(versions), []);
       });
     }
   };
