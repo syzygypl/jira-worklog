@@ -24,6 +24,11 @@ new Promise(function(resolve, reject) {
     .filter(option => !program[option]);
 
   if (missingOptions.length) {
+    if (isPiped) {
+      console.error('Missing required options:', missingOptions.join(', '));
+      process.exit(1);
+    }
+
     prompt.message = '';
     prompt.start();
     prompt.get(missingOptions.map(option => {
@@ -45,6 +50,8 @@ new Promise(function(resolve, reject) {
 
       resolve();
     });
+  } else {
+    resolve();
   }
 }).then(() => {
   var client = require('./src/client')({
