@@ -1,12 +1,13 @@
 module.exports = function(client) {
-  var groups = client('groups.findGroups').then(groups => {
-    return Promise.all(groups.groups.map(group => {
-      return client('group.getGroup', {
-        groupName: group.name,
-        expand: ['users']
-      });
-    }));
-  });
+  var groups = client('groups.findGroups', {maxResults: 1000})
+    .then(groups => {
+      return Promise.all(groups.groups.map(group => {
+        return client('group.getGroup', {
+          groupName: group.name,
+          expand: ['users']
+        });
+      }));
+    });
 
   var users = groups.then(groups => {
     var map = new Map();
