@@ -77,9 +77,9 @@ module.exports = function(client) {
             var worklogs = results[1];
 
             worklogs.worklogs
-              .filter(worklog => worklog.author.key)
+              .filter(worklog => worklog.author.key || worklog.author.name)
               .forEach(worklog => {
-                const key = worklog.author.key;
+                const key = worklog.author.key || worklog.author.name;
                 const set = users.get(key);
                 if (set) {
                   for (var group of set) {
