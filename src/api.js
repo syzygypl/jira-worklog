@@ -124,6 +124,7 @@ module.exports = function(client) {
           return getTimespent(item.issues).then(timespent => {
             item.version.timespent = timespent;
             item.version.projectKey = projectKey;
+            item.version.dataUpdateDate = new Date().toString();
 
             return item.version;
           });
