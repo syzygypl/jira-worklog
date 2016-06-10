@@ -1,4 +1,6 @@
 module.exports = function(client) {
+  const GROUP_UNKNOWN = '__unknown__';
+
   var groups = client('groups.findGroups', {maxResults: 1000})
     .then(groups => {
       return Promise.all(groups.groups.map(group => {
@@ -10,17 +12,21 @@ module.exports = function(client) {
     });
 
   var users = groups.then(groups => {
+    groups.push({name: GROUP_UNKNOWN});
+
     var map = new Map();
 
     groups.forEach(group => {
-      group.users.items.forEach(user => {
-        var set = map.get(user.key);
-        if (!set) {
-          set = new Set();
-          map.set(user.key, set);
-        }
-        set.add(group.name);
-      });
+      if (group.users) {
+        group.users.items.forEach(user => {
+          var set = map.get(user.key);
+          if (!set) {
+            set = new Set();
+            map.set(user.key, set);
+          }
+          set.add(group.name);
+        });
+      }
     });
 
     return map;
@@ -77,16 +83,27 @@ module.exports = function(client) {
             var worklogs = results[1];
 
             worklogs.worklogs
-              .filter(worklog => worklog.author.key || worklog.author.name)
               .forEach(worklog => {
-                const key = worklog.author.key || worklog.author.name;
-                const set = users.get(key);
-                if (set) {
-                  for (var group of set) {
-                    timespent[group] =
-                      (timespent[group] || 0) +
-                      Math.round(worklog.timeSpentSeconds / 3600);
+                var isUnknown = true;
+
+                if (worklog => worklog.author.key || worklog.author.name) {
+                  const key = worklog.author.key || worklog.author.name;
+                  const set = users.get(key);
+                  // console.log(worklog.author, set);
+                  if (set) {
+                    isUnknown = false;
+
+                    for (var group of set) {
+                      timespent[group] =
+                          (timespent[group] || 0) +
+                          Math.round(worklog.timeSpentSeconds / 3600);
+                    }
                   }
+                }
+
+                if (isUnknown) {
+                  timespent[GROUP_UNKNOWN] = (timespent[GROUP_UNKNOWN] || 0) +
+                      Math.round(worklog.timeSpentSeconds / 3600);
                 }
               });
           });
