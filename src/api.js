@@ -96,14 +96,14 @@ module.exports = function(client) {
                     for (var group of set) {
                       timespent[group] =
                           (timespent[group] || 0) +
-                          Math.round(worklog.timeSpentSeconds / 3600);
+                          worklog.timeSpentSeconds;
                     }
                   }
                 }
 
                 if (isUnknown) {
                   timespent[GROUP_UNKNOWN] = (timespent[GROUP_UNKNOWN] || 0) +
-                      Math.round(worklog.timeSpentSeconds / 3600);
+                      worklog.timeSpentSeconds;
                 }
               });
           });
